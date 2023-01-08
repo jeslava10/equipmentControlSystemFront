@@ -19,7 +19,7 @@
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [showCurrentPageReport]="true">
         <ng-template pTemplate="caption">
             <div class="flex align-items-center justify-content-between">
-                <h5 class="m-0">Manage schools</h5>
+                <h5 class="m-0">Manage School</h5>
                 <span class="p-input-icon-left">
                     <i class="pi pi-search"></i>
                     <input pInputText type="text" (input)="dt.filterGlobal($event.target, 'contains')"
@@ -58,13 +58,13 @@
     </p-table>
 </div>
 
-<p-dialog [(visible)]="productDialog" [style]="{width: '450px'}" header="Product Details" [modal]="true"
+<p-dialog [(visible)]="productDialog" [style]="{width: '450px'}" header="School Details" [modal]="true"
     styleClass="p-fluid">
     <ng-template pTemplate="content">
         <div class="field">
             <label for="name">Name</label>
-            <input type="text" pInputText id="name" [(ngModel)]="school.name" required autofocus />
-            <small class="p-error" *ngIf="submitted && !school.name">Name is required.</small>
+            <input type="text" pInputText id="name" [(ngModel)]="school.schoolsDto[0].name" required autofocus />
+            <small class="p-error" *ngIf="submitted && !school.schoolsDto[0].name">Name is required.</small>
         </div>
     </ng-template>
 

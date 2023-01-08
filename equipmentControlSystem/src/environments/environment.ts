@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  urlAPI: "https://controlsystems.appdeploys.work"
+  token: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1AY29udHJvbHN5c3RlbS5jb20iLCJpYXQiOjE2NzMwMjQzMjIsImV4cCI6MTY3MzAyNzkyMiwibmFtZSI6IkV2ZXIgdHJvbGwgY2FyZSBtb25kYSIsImlkIjoxLCJlbWFpbCI6ImFkbUBjb250cm9sc3lzdGVtLmNvbSIsInJvbCI6IjEifQ.SOau-MxKo9W-oGumNy-EZpre0RLU_vopPHy-pq3VZYMsbh0gMAFcJBCHexV2x2HoW9WVNS3XJCO9QdzR0wbpcQ"
 };
 
 /*
