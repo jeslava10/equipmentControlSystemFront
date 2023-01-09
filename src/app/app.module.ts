@@ -39,8 +39,6 @@ import { AppLayoutModule } from './layout/app.layout.module';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { NotfoundComponent } from './components/notfound/notfound.component';
 
-
-
 @NgModule({
   declarations: [
     AppComponent,
