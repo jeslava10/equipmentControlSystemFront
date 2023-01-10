@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ConfirmationService } from 'primeng/api';
 import { MessageService } from 'primeng/api';
-import { SchoolService } from 'src/app/services/school.service';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import User from 'src/app/interfaces/users.interface';
@@ -13,6 +12,7 @@ import User from 'src/app/interfaces/users.interface';
 })
 export class UsersComponent implements OnInit {
   Delete = 'Delete';
+  errorMessage?: string;
 
   productDialog: boolean = false;
 
@@ -35,18 +35,15 @@ export class UsersComponent implements OnInit {
   });
 
   constructor(
-    private schoolService: SchoolService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private http: HttpClient
   ) {}
 
   ngOnInit() {
-    console.log('NgOnInit');
 
-    this.http
-      .get(this.url, { headers: this.headers })
-      .subscribe((value: any) => {
+    this.http.get<any>(this.url, { headers: this.headers }).subscribe({
+      next: value => {
         this.users = value.usersDto;
         this.users.forEach((value: any) => {
           if (value.rol === '1') {
@@ -56,7 +53,28 @@ export class UsersComponent implements OnInit {
           }
           console.log(value.rol);
         });
-      });
+      },
+      error: error => {
+        console.log(error);
+          if(error.status == 403){
+            this.errorMessage = error.message;
+            this.messageService.add({
+              severity: 'error',
+              summary: 'error',
+              detail: this.errorMessage,
+              life: 3000,
+            });
+          }else{
+            this.messageService.add({
+              severity: 'error',
+              summary: 'error',
+              detail: this.errorMessage,
+              life: 3000,
+            });
+          }
+
+      }
+  });
   }
 
   openNew() {
@@ -73,21 +91,14 @@ export class UsersComponent implements OnInit {
     this.user = user;
   }
 
-  deleteProduct(school: User) {
-    console.log('school', school);
+  deleteProduct(user: User) {
     this.confirmationService.confirm({
       message:
-        'Are you sure you want to delete ' + school.usersDto[0].name + '?',
+        'Are you sure you want to delete ' + user.usersDto[0].name + '?',
       header: 'Confirm',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        //Usar endpoint delete school
-        //Usar endpoint getSchool para traer listado de escuelas
-        this.http
-          .delete(this.url + `/${school.usersDto[0].id}`, {
-            headers: this.headers,
-          })
-          .subscribe((value) => {
+        this.http.delete(this.url + `/${user.usersDto[0].id}`, {headers: this.headers}).subscribe((value) => {
             this.updateView();
           });
         this.messageService.add({
@@ -98,6 +109,32 @@ export class UsersComponent implements OnInit {
         });
       },
     });
+
+    this.http.get<any>(this.url, { headers: this.headers }).subscribe({
+      next: value => {
+      },
+      error: error => {
+        console.log(error);
+          if(error.status == 403){
+            this.errorMessage = error.message;
+            this.messageService.add({
+              severity: 'error',
+              summary: 'error',
+              detail: this.errorMessage,
+              life: 3000,
+            });
+          }else{
+            this.messageService.add({
+              severity: 'error',
+              summary: 'error',
+              detail: this.errorMessage,
+              life: 3000,
+            });
+          }
+
+      }
+  });
+
   }
 
   hideDialog() {
@@ -107,7 +144,6 @@ export class UsersComponent implements OnInit {
 
   saveSchool() {
     this.submitted = true;
-
     if (this.user.usersDto[0].name.trim()) {
       if (this.user.usersDto[0].id !== 0) {
         //If id already exist the school get an update
@@ -160,7 +196,7 @@ export class UsersComponent implements OnInit {
         break;
       }
     }
-
     return index;
   }
+
 }
