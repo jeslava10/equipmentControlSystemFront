@@ -13,7 +13,6 @@ import { NotfoundComponent } from './components/notfound/notfound.component';
             {
                 path: '', component: AppLayoutComponent,
                 children: [
-                    { path: '', loadChildren: () => import('./components/dashboard/dashboard.module').then(m => m.DashboardModule) },
                     { path: 'school', component: SchoolComponent },
                     { path: 'users', component: UsersComponent },
                     { path: 'orders', component: OrdersComponent },

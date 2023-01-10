@@ -6,12 +6,6 @@
             <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2"
                 (click)="openNew()"></button>
         </ng-template>
-
-        <!-- <ng-template pTemplate="right">
-            <p-fileUpload mode="basic" accept="image/*" [maxFileSize]="1000000" label="Import" chooseLabel="Import"
-                class="mr-2 inline-block"></p-fileUpload>
-            <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-help"></button>
-        </ng-template> -->
     </p-toolbar>
 
     <p-table #dt [value]="schools" [rows]="10" [paginator]="true" [globalFilterFields]="['name']"
@@ -29,18 +23,12 @@
         </ng-template>
         <ng-template pTemplate="header">
             <tr>
-                <!-- <th style="width: 4rem">
-                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-                </th> -->
                 <th pSortableColumn="name" style="min-width:15rem">Name <p-sortIcon field="name"></p-sortIcon></th>
                 <th></th>
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-school>
             <tr>
-                <!-- <td>
-                    <p-tableCheckbox [value]="schools"></p-tableCheckbox>
-                </td> -->
                 <td>{{school.name}}</td>
                 <td>
                     <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"

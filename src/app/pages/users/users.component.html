@@ -6,12 +6,6 @@
             <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2"
                 (click)="openNew()"></button>
         </ng-template>
-
-        <!-- <ng-template pTemplate="right">
-            <p-fileUpload mode="basic" accept="image/*" [maxFileSize]="1000000" label="Import" chooseLabel="Import"
-                class="mr-2 inline-block"></p-fileUpload>
-            <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-help"></button>
-        </ng-template> -->
     </p-toolbar>
 
     <p-table #dt [value]="users" [rows]="10" [paginator]="true" [globalFilterFields]="['name']"
@@ -29,9 +23,6 @@
         </ng-template>
         <ng-template pTemplate="header">
             <tr>
-                <!-- <th style="width: 4rem">
-                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-                </th> -->
                 <th pSortableColumn="name" style="min-width:15rem">Name <p-sortIcon field="name"></p-sortIcon></th>
                 <th pSortableColumn="email" style="min-width:15rem">Email <p-sortIcon field="email"></p-sortIcon></th>
                 <th pSortableColumn="rol" style="min-width:15rem">Rol <p-sortIcon field="rol"></p-sortIcon></th>
@@ -40,9 +31,6 @@
         </ng-template>
         <ng-template pTemplate="body" let-user>
             <tr>
-                <!-- <td>
-                    <p-tableCheckbox [value]="users"></p-tableCheckbox>
-                </td> -->
                 <td>{{user.name}}</td>
                 <td>{{user.email}}</td>
                 <td>{{user.rol}}</td>
@@ -72,19 +60,19 @@
         </div>
         <div class="field">
             <label for="email">Email</label>
-            <input type="text" pInputText id="email" [(ngModel)]="user.usersDto[0].email" required autofocus />
+            <input type="email" pInputText id="email" [(ngModel)]="user.usersDto[0].email" required autofocus />
             <small class="p-error" *ngIf="submitted && !user.usersDto[0].email">email is required.</small>
+            <small class="p-error" *ngIf="!regexEmail.test(user.usersDto[0].passwd)">The format is not correct.</small>
         </div>
         <div class="field">
             <label for="passwd">Password</label>
             <input type="password" pInputText id="passwd" [(ngModel)]="user.usersDto[0].passwd" required autofocus />
             <small class="p-error" *ngIf="submitted && !user.usersDto[0].passwd">password is required.</small>
-            <small class="p-error" *ngIf="!regex.test(user.usersDto[0].passwd)">El formato no es el mas
-                correcto.</small>
+            <small class="p-error" *ngIf="!regexPassword.test(user.usersDto[0].passwd)">the format is not correct</small>
         </div>
         <div class="field">
             <label for="rol">Rol</label>
-            <input type="text" pInputText id="rol" [(ngModel)]="user.usersDto[0].rol" required autofocus />
+            <p-dropdown [options]="roles" [(ngModel)]="selectedRoles1" placeholder="Select a role" optionLabel="name" [showClear]="true"></p-dropdown>
             <small class="p-error" *ngIf="submitted && !user.usersDto[0].rol">rol is required.</small>
         </div>
     </ng-template>

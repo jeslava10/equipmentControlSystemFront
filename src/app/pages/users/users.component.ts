@@ -4,7 +4,10 @@ import { MessageService } from 'primeng/api';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import User from 'src/app/interfaces/users.interface';
-
+interface Roles {
+    name: string,
+    code: number
+}
 @Component({
   selector: 'app-users',
   templateUrl: './users.component.html',
@@ -13,6 +16,9 @@ import User from 'src/app/interfaces/users.interface';
 export class UsersComponent implements OnInit {
   Delete = 'Delete';
   errorMessage?: string;
+
+  roles: Roles[]  = [];
+  selectedRoles1!: Roles;
 
   productDialog: boolean = false;
 
@@ -25,7 +31,8 @@ export class UsersComponent implements OnInit {
   };
 
   submitted: boolean = true;
-  regex = new RegExp("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.]+@[a-zA-Z0-9.]+$");
+  regexPassword = new RegExp("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.]+@[a-zA-Z0-9.]+$");
+  regexEmail= new RegExp("^(?=\\w*\\d)(?=\\w*[A-Z])(?=\\w*[a-z])\\S{8,16}$");
 
   url = '/api/users';
 
@@ -38,10 +45,16 @@ export class UsersComponent implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private http: HttpClient
-  ) {}
+  ) {
+
+    this.roles = [
+        {name: 'Admin', code: 1},
+        {name: 'Employee', code: 2}
+    ];
+
+  }
 
   ngOnInit() {
-
     this.http.get<any>(this.url, { headers: this.headers }).subscribe({
       next: value => {
         this.users = value.usersDto;
@@ -56,8 +69,8 @@ export class UsersComponent implements OnInit {
       },
       error: error => {
         console.log(error);
+        this.errorMessage = error.message;
           if(error.status == 403){
-            this.errorMessage = error.message;
             this.messageService.add({
               severity: 'error',
               summary: 'error',
@@ -66,9 +79,8 @@ export class UsersComponent implements OnInit {
             });
           }else{
             this.messageService.add({
-              severity: 'error',
               summary: 'error',
-              detail: this.errorMessage,
+              detail: error.error.message,
               life: 3000,
             });
           }
@@ -89,34 +101,36 @@ export class UsersComponent implements OnInit {
   editProduct(user: User) {
     this.productDialog = true;
     this.user = user;
+    if(this.user.usersDto[0].rol == 1 ){
+        this.selectedRoles1 = {name: 'Admin', code: 1};
+    }else{
+        this.selectedRoles1 = {name: 'Employee', code: 2};
+    }
   }
 
-  deleteProduct(user: User) {
+  deleteProduct(school: User) {
+    console.log('user', school);
     this.confirmationService.confirm({
       message:
-        'Are you sure you want to delete ' + user.usersDto[0].name + '?',
+        'Are you sure you want to delete ' + school.usersDto[0].name + '?',
       header: 'Confirm',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.http.delete(this.url + `/${user.usersDto[0].id}`, {headers: this.headers}).subscribe((value) => {
-            this.updateView();
-          });
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Successful',
-          detail: 'Product Deleted',
-          life: 3000,
-        });
-      },
-    });
 
-    this.http.get<any>(this.url, { headers: this.headers }).subscribe({
+    this.http.delete(this.url + `/${school.usersDto[0].id}`, {headers: this.headers}).subscribe({
       next: value => {
+        this.updateView();
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Successful',
+            detail: 'User Deleted',
+            life: 3000,
+          });
       },
       error: error => {
         console.log(error);
+        this.errorMessage = error.message;
           if(error.status == 403){
-            this.errorMessage = error.message;
             this.messageService.add({
               severity: 'error',
               summary: 'error',
@@ -127,15 +141,16 @@ export class UsersComponent implements OnInit {
             this.messageService.add({
               severity: 'error',
               summary: 'error',
-              detail: this.errorMessage,
+              detail: error.error.message,
               life: 3000,
             });
           }
 
       }
   });
-
-  }
+ },
+});
+}
 
   hideDialog() {
     this.productDialog = false;
@@ -145,34 +160,69 @@ export class UsersComponent implements OnInit {
   saveSchool() {
     this.submitted = true;
     if (this.user.usersDto[0].name.trim()) {
+        this.user.usersDto[0].rol = this.selectedRoles1.code;
       if (this.user.usersDto[0].id !== 0) {
-        //If id already exist the school get an update
-        //Consumir endpoint de update School
-        this.http
-          .put(this.url, this.user.usersDto[0], { headers: this.headers })
-          .subscribe((value) => {
-            console.log(value);
-            this.updateView();
-          });
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Successful',
-          detail: 'Product Updated',
-          life: 3000,
+        this.http.put(this.url, this.user.usersDto[0], { headers: this.headers }).subscribe({
+            next: value => {
+              this.updateView();
+              this.messageService.add({
+                  severity: 'success',
+                  summary: 'Successful',
+                  detail: 'User Updated',
+                  life: 3000,
+                });
+            },
+            error: error => {
+              console.log(error);
+              this.errorMessage = error.message;
+                if(error.status == 403){
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'error',
+                    detail: this.errorMessage,
+                    life: 3000,
+                  });
+                }else{
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'error',
+                    detail: error.error.message,
+                    life: 3000,
+                  });
+                }
+
+            }
         });
       } else {
-        //Consumir endpoint guardado
-        this.http
-          .post(this.url, this.user.usersDto[0], { headers: this.headers })
-          .subscribe((value) => {
-            console.log(value);
-            this.updateView();
-          });
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Successful',
-          detail: 'Product Created',
-          life: 3000,
+        this.http.post(this.url, this.user.usersDto[0], { headers: this.headers }).subscribe({
+            next: (value) => {
+              this.updateView();
+              this.messageService.add({
+                  severity: 'success',
+                  summary: 'Successful',
+                  detail: 'User Created',
+                  life: 3000,
+                });
+            },
+            error: (error) => {
+                if(error.status == 403){
+                 this.errorMessage = error.message;
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'error',
+                    detail: this.errorMessage,
+                    life: 3000,
+                  });
+                }else{
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'error',
+                    detail: error.error.message,
+                    life: 3000,
+                  });
+                }
+
+            }
         });
       }
       this.productDialog = false;

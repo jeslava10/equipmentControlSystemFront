@@ -1,10 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ConfirmationService } from 'primeng/api';
 import { MessageService } from 'primeng/api';
-import { SchoolService } from 'src/app/services/school.service';
 import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import School from 'src/app/interfaces/school.interface';
+import School, { SchoolsDto } from 'src/app/interfaces/school.interface';
 
 @Component({
   selector: 'app-table-crud',
@@ -20,8 +19,17 @@ export class TableCrudComponent implements OnInit {
 
   school: School = {
     message: '',
-    schoolsDto: [],
+    schoolsDto:  [ {
+        id: 0,
+        name: '',
+      }
+    ]
   };
+
+  schoolsDto: SchoolsDto = {
+    id: 0,
+    name: '',
+  }
 
   submitted: boolean = true;
 
@@ -33,7 +41,6 @@ export class TableCrudComponent implements OnInit {
   });
 
   constructor(
-    private schoolService: SchoolService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private http: HttpClient
@@ -52,34 +59,40 @@ export class TableCrudComponent implements OnInit {
   openNew() {
     this.school = {
       message: '',
-      schoolsDto: [
-        {
+      schoolsDto:[{
           id: 0,
           name: '',
-        },
-      ],
+        }
+    ]
     };
+
+    this.schoolsDto =    {
+        id: 0,
+        name: '',
+      };
+
     this.submitted = false;
     this.productDialog = true;
   }
 
-  editProduct(school: School) {
+  editProduct(schoolEdit: School) {
     this.productDialog = true;
-    this.school = school;
+    this.school = schoolEdit;
+    this.schoolsDto = schoolEdit.schoolsDto[0];
+    console.log('schoolEdit',  this.school);
+    console.log('schoolsDto',  this.school);
   }
 
-  deleteProduct(school: School) {
-    console.log('school', school);
+  deleteProduct(schoolDelete: School) {
+    console.log('schoolDelete', schoolDelete);
     this.confirmationService.confirm({
       message:
-        'Are you sure you want to delete ' + school.schoolsDto[0].name + '?',
+        'Are you sure you want to delete ' + schoolDelete.schoolsDto[0].name + '?',
       header: 'Confirm',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        //Usar endpoint delete school
-        //Usar endpoint getSchool para traer listado de escuelas
         this.http
-          .delete(this.url + `/${school.schoolsDto[0].id}`, {
+          .delete(this.url + `/${schoolDelete.schoolsDto[0].id}`, {
             headers: this.headers,
           })
           .subscribe((value) => {
@@ -102,13 +115,10 @@ export class TableCrudComponent implements OnInit {
 
   saveSchool() {
     this.submitted = true;
-
     if (this.school.schoolsDto[0].name.trim()) {
       if (this.school.schoolsDto[0].id !== 0) {
-        //If id already exist the school get an update
-        //Consumir endpoint de update School
         this.http
-          .put(this.url, this.school, { headers: this.headers })
+          .put(this.url, this.school.schoolsDto, { headers: this.headers })
           .subscribe((value) => {
             this.updateView();
           });
@@ -120,8 +130,9 @@ export class TableCrudComponent implements OnInit {
         });
       } else {
         //Consumir endpoint guardado
+        console.log(this.school);
         this.http
-          .post(this.url, this.school, { headers: this.headers })
+          .post(this.url, this.school.schoolsDto, { headers: this.headers })
           .subscribe((value) => {
             this.updateView();
           });
