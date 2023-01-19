@@ -16,7 +16,7 @@
                 <h5 class="m-0">Manage School</h5>
                 <span class="p-input-icon-left">
                     <i class="pi pi-search"></i>
-                    <input pInputText type="text" (input)="dt.filterGlobal($event.target, 'contains')"
+                    <input pInputText type="text" (input)="searchFilter($event)"
                         placeholder="Search..." />
                 </span>
             </div>
