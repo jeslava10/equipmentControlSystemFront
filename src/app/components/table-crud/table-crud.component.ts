@@ -48,7 +48,6 @@ export class TableCrudComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        console.log('NgOnInit');
         this.updateView();
     }
 
@@ -73,26 +72,22 @@ export class TableCrudComponent implements OnInit {
     }
 
     editProduct(schoolEdit: SchoolsDto) {
-        console.log(schoolEdit);
-        console.log(this.school.schoolsDto[0]);
         this.school.schoolsDto[0] = schoolEdit;
         this.productDialog = true;
     }
 
     deleteProduct(schoolDelete: SchoolsDto) {
-        console.log('schoolDelete', schoolDelete);
         this.confirmationService.confirm({
             message: `Are you sure you want to delete ${schoolDelete.name} ?`,
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                console.log(this.url + `/${schoolDelete.id}`);
                 this.http
-                    .delete(this.url + '/' + schoolDelete.id, {
+                    .delete<any>(this.url + '/' + schoolDelete.id, {
                         headers: this.headers,
                     })
-                    .subscribe(
-                        (value) => {
+                    .subscribe({
+                        next: (value) => {
                             this.messageService.add({
                                 severity: 'success',
                                 summary: 'Successful',
@@ -101,16 +96,15 @@ export class TableCrudComponent implements OnInit {
                             });
                             this.updateView();
                         },
-                        (error) => {
+                        error: (error) => {
                             this.messageService.add({
                                 severity: 'error',
                                 summary: 'Error',
-                                detail: 'We could not delete school',
+                                detail: error.error.message,
                                 life: 3000,
                             });
-                            console.log(`Sucedio este error: ${error}`);
-                        }
-                    );
+                        },
+                    });
             },
         });
     }
@@ -128,8 +122,8 @@ export class TableCrudComponent implements OnInit {
                     .put(this.url, this.school.schoolsDto[0], {
                         headers: this.headers,
                     })
-                    .subscribe(
-                        (value) => {
+                    .subscribe({
+                        next: (value) => {
                             this.messageService.add({
                                 severity: 'success',
                                 summary: 'Successful',
@@ -138,25 +132,23 @@ export class TableCrudComponent implements OnInit {
                             });
                             this.updateView();
                         },
-                        (error) => {
+                        error: (error) => {
                             this.messageService.add({
                                 severity: 'error',
                                 summary: 'Error',
                                 detail: 'We could not update school',
                                 life: 3000,
                             });
-                            console.log(`Ocurrio este error: ${error}`);
-                        }
-                    );
+                        },
+                    });
             } else {
                 //Consumir endpoint guardado
-                console.log(this.school.schoolsDto);
                 this.http
                     .post(this.url, this.school.schoolsDto[0], {
                         headers: this.headers,
                     })
-                    .subscribe(
-                        (value) => {
+                    .subscribe({
+                        next: (value) => {
                             this.messageService.add({
                                 severity: 'success',
                                 summary: 'Successful',
@@ -165,36 +157,26 @@ export class TableCrudComponent implements OnInit {
                             });
                             this.updateView();
                         },
-                        (error) => {
+                        error: (error) => {
                             this.messageService.add({
                                 severity: 'error',
                                 summary: 'Error',
                                 detail: 'We could not create school',
                                 life: 3000,
                             });
-                            console.log(
-                                `Ocurrio este error: ${JSON.stringify(error)}`
-                            );
-                        }
-                    );
+                        },
+                    });
             }
             this.productDialog = false;
         }
-        console.log(this.school);
     }
 
     updateView = () => {
-        this.http
-            .get(this.url, { headers: this.headers })
-            .subscribe((value: any) => {
+        this.http.get(this.url, { headers: this.headers }).subscribe({
+            next: (value: any) => {
                 this.schools = value.schoolsDto;
-            });
-
-        // this.http
-        //     .get('/api/school/', { headers: this.headers })
-        //     .subscribe((value: any) => {
-        //         this.schools = value.schoolsDto;
-        //     });
+            },
+        });
     };
 
     findIndexById(id: number): number {
@@ -213,7 +195,6 @@ export class TableCrudComponent implements OnInit {
         const keyWord = event.target.value;
         if (keyWord === '') {
             this.updateView();
-            console.log('Traer todo el resultado.');
         } else {
             const arrayToFilter = [...this.schools];
             this.schools = arrayToFilter.filter((school: any) => {
@@ -221,8 +202,6 @@ export class TableCrudComponent implements OnInit {
                     return school;
                 }
             });
-            console.log(`Copia de schools: ${JSON.stringify(arrayToFilter)}`);
-            console.log('filtrando', event.target.value);
         }
     };
 }

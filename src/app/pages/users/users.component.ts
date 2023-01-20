@@ -18,7 +18,7 @@ export class UsersComponent implements OnInit {
     errorMessage?: string;
 
     roles: Roles[] = [];
-    selectedRoles1!: Roles;
+    selectedRoles1: Roles = { name: '', code: 0 };
 
     productDialog: boolean = false;
 
@@ -31,10 +31,7 @@ export class UsersComponent implements OnInit {
     };
 
     submitted: boolean = true;
-    regexPassword = new RegExp(
-        "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.]+@[a-zA-Z0-9.]+$"
-    );
-    regexEmail = new RegExp('^(?=\\w*\\d)(?=\\w*[A-Z])(?=\\w*[a-z])\\S{8,16}$');
+    
 
     url = '/api/users';
 
@@ -162,79 +159,86 @@ export class UsersComponent implements OnInit {
 
     saveSchool() {
         this.submitted = true;
-        if (this.user.usersDto[0].name.trim()) {
+        if (
+            this.user.usersDto[0].name.trim() &&
+            this.user.usersDto[0].email.trim() &&
+            this.user.usersDto[0].passwd.trim() &&
+            !this.validarPassword()
+        ) {
             this.user.usersDto[0].rol = this.selectedRoles1.code;
-            if (this.user.usersDto[0].id !== 0) {
-                this.http
-                    .put(this.url, this.user.usersDto[0], {
-                        headers: this.headers,
-                    })
-                    .subscribe({
-                        next: (value) => {
-                            this.updateView();
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Successful',
-                                detail: 'User Updated',
-                                life: 3000,
-                            });
-                        },
-                        error: (error) => {
-                            console.log(error);
-                            this.errorMessage = error.message;
-                            if (error.status == 403) {
+            if (this.selectedRoles1.code > 0) {
+                if (this.user.usersDto[0].id !== 0) {
+                    this.http
+                        .put(this.url, this.user.usersDto[0], {
+                            headers: this.headers,
+                        })
+                        .subscribe({
+                            next: (value) => {
+                                this.updateView();
                                 this.messageService.add({
-                                    severity: 'error',
-                                    summary: 'error',
-                                    detail: this.errorMessage,
+                                    severity: 'success',
+                                    summary: 'Successful',
+                                    detail: 'User Updated',
                                     life: 3000,
                                 });
-                            } else {
-                                this.messageService.add({
-                                    severity: 'error',
-                                    summary: 'error',
-                                    detail: error.error.message,
-                                    life: 3000,
-                                });
-                            }
-                        },
-                    });
-            } else {
-                this.http
-                    .post(this.url, this.user.usersDto[0], {
-                        headers: this.headers,
-                    })
-                    .subscribe({
-                        next: (value) => {
-                            this.updateView();
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Successful',
-                                detail: 'User Created',
-                                life: 3000,
-                            });
-                        },
-                        error: (error) => {
-                            if (error.status == 403) {
+                            },
+                            error: (error) => {
+                                console.log(error);
                                 this.errorMessage = error.message;
+                                if (error.status == 403) {
+                                    this.messageService.add({
+                                        severity: 'error',
+                                        summary: 'error',
+                                        detail: this.errorMessage,
+                                        life: 3000,
+                                    });
+                                } else {
+                                    this.messageService.add({
+                                        severity: 'error',
+                                        summary: 'error',
+                                        detail: error.error.message,
+                                        life: 3000,
+                                    });
+                                }
+                            },
+                        });
+                } else {
+                    this.http
+                        .post(this.url, this.user.usersDto[0], {
+                            headers: this.headers,
+                        })
+                        .subscribe({
+                            next: (value) => {
+                                this.updateView();
                                 this.messageService.add({
-                                    severity: 'error',
-                                    summary: 'error',
-                                    detail: this.errorMessage,
+                                    severity: 'success',
+                                    summary: 'Successful',
+                                    detail: 'User Created',
                                     life: 3000,
                                 });
-                            } else {
-                                this.messageService.add({
-                                    severity: 'error',
-                                    summary: 'error',
-                                    detail: error.error.message,
-                                    life: 3000,
-                                });
-                            }
-                        },
-                    });
+                            },
+                            error: (error) => {
+                                if (error.status == 403) {
+                                    this.errorMessage = error.message;
+                                    this.messageService.add({
+                                        severity: 'error',
+                                        summary: 'error',
+                                        detail: this.errorMessage,
+                                        life: 3000,
+                                    });
+                                } else {
+                                    this.messageService.add({
+                                        severity: 'error',
+                                        summary: 'error',
+                                        detail: error.error.message,
+                                        life: 3000,
+                                    });
+                                }
+                            },
+                        });
+                }
+                this.productDialog = false;
             }
-            this.productDialog = false;
         }
         console.log(this.user);
     }
@@ -259,19 +263,41 @@ export class UsersComponent implements OnInit {
     }
 
     validarEmail = () => {
-        const validate = true;
-        console.log('Validando email...');
-        return validate;
+        let regexEmailTest = false;
+        const regexEmail = new RegExp("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.]+@[a-zA-Z0-9.]+$");
+        if (this.user.usersDto[0].email !== '') {
+            regexEmailTest = regexEmail.test(
+                this.user.usersDto[0].email
+            );
+            return !regexEmailTest;
+        } else {
+            return false;
+        }
     };
 
     validarPassword = () => {
-        let validate = true;
-        if (this.user.usersDto[0].passwd === '') {
-            validate = true;
+        let regexPasswordTest = false;
+        const regexPassword = new RegExp(
+            '^(?=\\w*\\d)(?=\\w*[A-Z])(?=\\w*[a-z])\\S{8,16}$'
+        );
+        if (this.user.usersDto[0].passwd !== '') {
+            regexPasswordTest = regexPassword.test(
+                this.user.usersDto[0].passwd
+            );
+            return !regexPasswordTest;
         } else {
-            validate = false;
-            console.log('Validando password...', this.user.usersDto[0].passwd);
+            return false;
         }
-        return validate;
+    };
+
+    validarRol = () => {
+        let regexPasswordTest = false;
+        if (this.selectedRoles1.code > 0) {
+            console.log(this.selectedRoles1.code)
+            console.log(!regexPasswordTest)
+            return !regexPasswordTest
+        } else {
+            return false;
+        }
     };
 }
